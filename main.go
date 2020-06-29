@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"getzoop/zec-companion-app/app"
+	"github.com/PauloLeal/go-iris-app-template/app"
+	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 )
@@ -20,11 +21,29 @@ func getDefaultPort() int {
 	return defaultEnvPort
 }
 
+func initLogger(logLevel logrus.Level) {
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+	})
+
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logLevel)
+}
+
 func main() {
 	var serverPort = flag.Int("p", getDefaultPort(), "web server http port")
+	var logAll = flag.Bool("log-all", false, "Log all messages (trace level)")
+
 	flag.Parse()
 
-	app.Logger().Debug("START")
+	logLevel := logrus.InfoLevel
+	if *logAll {
+		logLevel = logrus.TraceLevel
+	}
+
+	initLogger(logLevel)
+
+	logrus.Debug("START")
 
 	_ = app.App().RunServer(*serverPort)
 }

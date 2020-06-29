@@ -2,11 +2,11 @@ package app
 
 import (
 	"fmt"
-	"getzoop/zec-companion-app/controllers"
-	"github.com/kataras/golog"
+	"github.com/PauloLeal/go-iris-app-template/controllers"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
+	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -27,7 +27,7 @@ func App() *application {
 }
 
 func (app *application) initialize() {
-	app.iris.Logger().SetLevel("debug")
+	app.iris.Logger().SetLevel("info")
 	app.iris.Use(recover.New())
 	app.iris.Use(logger.New(logger.Config{
 		Status:             true,
@@ -39,13 +39,12 @@ func (app *application) initialize() {
 		MessageContextKeys: nil,
 		MessageHeaderKeys:  nil,
 		LogFunc: func(now time.Time, latency time.Duration, status, ip, method, path string, message interface{}, headerMessage interface{}) {
-			l := fmt.Sprintf("->%s [%s] %s - %s %s",
-				now.Format("2006/01/02 - 15:04:05"),
+			l := fmt.Sprintf("ACCESS [%s] %s - %s %s",
 				ip,
 				status,
 				method,
 				path)
-			app.iris.Logger().Info(l)
+			logrus.Info(l)
 		},
 		Skippers: nil,
 	}))
@@ -58,23 +57,11 @@ func (app *application) RunServer(port int) error {
 }
 
 func (app *application) createRoutes() {
-	healthController := controllers.HealthController()
+	healthController := controllers.NewHealthController()
 	app.iris.Get("/health", healthController.Get)
 
-	app.Logger().Infof("%+V", app)
-	app.Logger().Debugf("%+V", app)
+	app.iris.Handle("ALL", "/*", func(ctx iris.Context) {
+		ctx.StatusCode(404)
+	})
 
-	app.Logger().Info("qweqwe")
-	app.Logger().Debug("qweqwe")
-
-	app.Logger().Info(app.iris)
-	app.Logger().Debug(app.iris)
-}
-
-func (app *application) Logger() *golog.Logger {
-	return app.iris.Logger()
-}
-
-func Logger() *golog.Logger {
-	return App().Logger()
 }

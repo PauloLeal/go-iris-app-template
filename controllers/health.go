@@ -2,27 +2,16 @@ package controllers
 
 import (
 	"github.com/kataras/iris"
-	"sync"
 )
 
-type healthController struct {
+type HealthController struct {
 }
 
-var healthControllerInstance *healthController
-var healthControllerOnce sync.Once
-
-func HealthController() *healthController {
-	healthControllerOnce.Do(func() {
-		healthControllerInstance = &healthController{}
-		healthControllerInstance.initialize()
-	})
-	return healthControllerInstance
+func NewHealthController() *HealthController {
+	return &HealthController{}
 }
 
-func (l *healthController) initialize() {
-
-}
-
-func (l *healthController) Get(ctx iris.Context) {
+func (ctrl *HealthController) Get(ctx iris.Context) {
+	ctx.StatusCode(200)
 	_, _ = ctx.JSON(iris.Map{"status": "ok"})
 }
